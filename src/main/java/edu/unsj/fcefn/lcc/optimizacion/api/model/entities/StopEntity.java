@@ -7,11 +7,11 @@ import lombok.NoArgsConstructor;
 import javax.persistence.*;
 
 @Entity
-@Table(name = "transport_companies")
+@Table(name = "stops")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class TransportCompanyEntity {
+public class StopEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
@@ -20,6 +20,21 @@ public class TransportCompanyEntity {
     @Column(name = "name")
     private String name;
 
-    @Column(name = "logo")
-    private String logo;
+    @Column(name = "city")
+    private String city;
+
+    @Column(name = "province")
+    private String province;
+
+    @Column(name = "country")
+    private String country;
+
+    @Column(name = "latitud")
+    private String latitud;
+
+    @Column(name = "logitud")
+    private String logitud;
+
+    @Column(name = "ranking")
+    private Integer ranking;
 }
