@@ -11,11 +11,12 @@ import java.time.LocalTime;
 @AllArgsConstructor
 public class FrameDTO {
 	private Integer id;
-	private Integer idTransportCompany;
-	private Integer idStopDeparture;
-	private Integer idStopArrival;
 	private Float price;
 	private String category;
 	private LocalTime departureDatetime;
 	private LocalTime arrivalDatetime;
+	private TransportCompanyDTO transportCompany;
+	private StopDTO arrivalStop;
+	private StopDTO departureStop;
+
 }

@@ -4,10 +4,16 @@ import edu.unsj.fcefn.lcc.optimizacion.api.model.domain.StopDTO;
 import edu.unsj.fcefn.lcc.optimizacion.api.model.entities.StopEntity;
 import org.springframework.stereotype.Component;
 
+import java.util.Objects;
+
 @Component
 public class StopsMapper {
     public StopDTO entityToDTO(StopEntity stopEntity){
         StopDTO stopDTO = new StopDTO();
+
+        if(Objects.isNull(stopEntity)){
+            return stopDTO;
+        }
 
         stopDTO.setId(stopEntity.getId());
         stopDTO.setName(stopEntity.getName());
