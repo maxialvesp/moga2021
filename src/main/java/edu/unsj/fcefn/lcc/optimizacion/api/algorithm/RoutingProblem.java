@@ -10,9 +10,11 @@ import org.moeaframework.core.variable.EncodingUtils;
 import org.moeaframework.core.variable.Permutation;
 import org.moeaframework.problem.AbstractProblem;
 import org.springframework.beans.factory.annotation.Autowired;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Objects;
+
+import java.time.Duration;
+import java.time.LocalTime;
+import java.time.Period;
+import java.util.*;
 
 public class RoutingProblem extends AbstractProblem {
 
@@ -61,8 +63,60 @@ public class RoutingProblem extends AbstractProblem {
     }
 
     private double totalTime(Variable variable){
+        Permutation permutation = (Permutation)variable;
         List<StopDTO> stops = algorithmService.getStops();
-        return 0.0;
+
+        double totalTime = 0;
+
+        for(int i = 0;i < permutation.size() - 1;i++){
+            StopDTO departureStop = stops.get(permutation.get(i));
+            StopDTO arrivalStop = stops.get(permutation.get(i + 1));
+
+            List<FrameDTO> frames = framesService
+                    .findByIdDepartureStopAndIdArrivalStop(departureStop.getId(), arrivalStop.getId());
+
+            Map<Integer, Long> mapTime = getTimeMaps(frames);
+            Map.Entry<Integer, Long> frameIdTimeToArrival = mapTime
+                    .entrySet()
+                    .stream()
+                    .min(Map.Entry.comparingByValue())
+                    .orElse(null);
+
+            if(Objects.isNull(frameIdTimeToArrival)){
+                return Double.MAX_VALUE;
+            }
+
+            FrameDTO frameDTO = frames
+                    .stream()
+                    .filter(frame -> frame.getId().equals(frameIdTimeToArrival.getKey()))
+                    .findFirst()
+                    .orElse(null);
+
+            if(Objects.isNull(frameDTO)){
+                return Double.MAX_VALUE;
+            }
+
+            totalTime += frameIdTimeToArrival.getValue();
+        }
+
+        return totalTime;
+    }
+
+    private Map<Integer, Long> getTimeMaps(List<FrameDTO> frames){
+        Map<Integer, Long> mapTime = new HashMap<>();
+        for(FrameDTO frame : frames){
+            if(frame.getDepartureDatetime().isBefore(frame.getArrivalDatetime())){
+                Long timeToArrival = Duration.between(frame.getDepartureDatetime(), frame.getArrivalDatetime()).getSeconds();
+                mapTime.put(frame.getId(), timeToArrival);
+            } else {
+                Long timeToArrivalRange1 = Duration.between(frame.getDepartureDatetime(), LocalTime.MIDNIGHT).getSeconds();
+                Long timeToArrivalRange2 = Duration.between(LocalTime.MIDNIGHT, frame.getArrivalDatetime()).getSeconds();
+                Long timeToArrival = timeToArrivalRange1 + timeToArrivalRange2;
+                mapTime.put(frame.getId(), timeToArrival);
+            }
+        }
+
+        return mapTime;
     }
 
     @Override
